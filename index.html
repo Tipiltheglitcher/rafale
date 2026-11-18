@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAFALE — jeu de tir multijoueur</title>
+<meta name="description" content="RAFALE : jeu de tir 3D gratuit dans le navigateur. Battle royale solo, duo, trio ou escouade et JcJ chacun pour soi, jusqu'à 16 joueurs par salon avec un simple code.">
+<meta name="theme-color" content="#0d1015">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230d1015'/%3E%3Cpath d='M14 46 34 14h8L26 40h18l-4 6z' fill='%23ff7a2a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="vendor/peerjs.min.js"></script>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui">
+  <header id="topbar">
+    <button class="logo" data-go="home"><i></i>RAFALE</button>
+    <nav>
+      <button data-go="play">Jouer</button>
+      <button data-go="multi">Multijoueur</button>
+      <button data-go="shop">Boutique</button>
+      <button data-go="settings">Paramètres</button>
+    </nav>
+    <div class="me"><span class="cr"><i>¢</i><b id="credits">0</b></span><span id="pname"></span></div>
+  </header>
+
+  <section id="s-home" class="screen">
+    <div class="hero">
+      <p class="kicker">Jeu de tir en ligne · gratuit · dans le navigateur</p>
+      <h1>RAFALE</h1>
+      <p class="lead">Battle royale et chacun pour soi, jusqu’à <b>16 joueurs</b> par salon. Créez un salon, partagez le code, c’est parti.</p>
+      <div class="big-btns">
+        <button class="btn primary xl" data-go="play">Jouer contre des bots</button>
+        <button class="btn xl" data-go="multi">Multijoueur</button>
+      </div>
+      <div class="small-btns"><button class="btn" data-go="shop">Boutique &amp; personnalisation</button><button class="btn" data-go="settings">Paramètres</button></div>
+      <div id="home-stats" class="stats"></div>
+    </div>
+  </section>
+
+  <section id="s-play" class="screen">
+    <div class="panel right wide">
+      <h2>Partie contre des bots</h2>
+      <p class="note">Hors ligne, rien à installer. Choisissez un mode, une carte et le nombre de bots.</p>
+      <h3>Mode</h3><div id="play-modes" class="modes"></div>
+      <h3>Carte</h3><div id="play-maps" class="maps"></div>
+      <div class="two">
+        <label>Bots <output id="play-botsv"></output><input type="range" id="play-bots" min="1" max="23"></label>
+        <label>Difficulté<div id="play-diff" class="seg small"></div></label>
+      </div>
+      <div class="go"><button class="btn primary xl" id="play-go">Lancer la partie</button></div>
+    </div>
+  </section>
+
+  <section id="s-multi" class="screen">
+    <div class="panel right">
+      <h2>Multijoueur</h2>
+      <div class="card">
+        <h3>Créer un salon</h3>
+        <p class="note">Votre navigateur héberge la partie : jusqu’à 16 joueurs, complétée par des bots si vous le souhaitez. Vous réglerez le mode, les bots et la rotation des cartes dans le salon.</p>
+        <button class="btn primary" id="btn-create">Créer un salon</button>
+      </div>
+      <div class="card">
+        <h3>Rejoindre un salon</h3>
+        <p class="note">Entrez le code à 5 caractères donné par l’hôte.</p>
+        <div class="joinrow"><input id="joincode" maxlength="5" placeholder="CODE" autocomplete="off" spellcheck="false"><button class="btn primary" id="btn-join">Rejoindre</button></div>
+      </div>
+      <p class="note small">Connexion directe entre navigateurs (WebRTC). Si la connexion échoue sur votre réseau, voir Paramètres → Réseau.</p>
+    </div>
+  </section>
+
+  <section id="s-lobby" class="screen">
+    <div class="lobby">
+      <div class="lhead">
+        <div><small>Code du salon</small><div class="code" id="lobby-code"></div><p id="lobby-sub" class="note"></p></div>
+        <div class="lbtns"><button class="btn" id="lobby-copy">Copier l’invitation</button><button class="btn danger" id="lobby-leave">Quitter</button></div>
+      </div>
+      <div class="lbody">
+        <div class="lcol">
+          <h3>Joueurs <span id="lobby-count"></span></h3>
+          <div id="lobby-players"></div>
+          <div id="lobby-chat"><div class="log"></div><input placeholder="Écrire un message…" maxlength="140"></div>
+        </div>
+        <div class="lcol"><div id="lobby-cfg"></div></div>
+      </div>
+      <div class="lfoot"><span id="lobby-status"></span><button class="btn" id="lobby-back">Revenir à la partie</button><button class="btn danger" id="lobby-stop">Terminer la partie en cours</button><button class="btn primary xl" id="lobby-start">Lancer la partie</button></div>
+    </div>
+  </section>
+
+  <section id="s-shop" class="screen"><div class="panel right wide" id="shopbox"></div></section>
+  <section id="s-settings" class="screen"><div class="panel center" id="setbox"></div></section>
+  <section id="s-game" class="screen"></section>
+
+  <div id="loading"><div><small>Chargement de la carte</small><b></b><span></span><i class="spin"></i></div></div>
+  <div id="pause">
+    <div class="pbox">
+      <h2>Pause</h2>
+      <button class="btn primary xl" id="pause-resume">Reprendre</button>
+      <div id="pause-help" class="help"></div>
+      <div class="pacts"><button class="btn" id="pause-settings">Paramètres</button><span id="pause-acts"></span></div>
+    </div>
+    <div class="pset"><div id="pause-set"></div><button class="btn primary" id="pause-setback">Retour</button></div>
+  </div>
+  <div id="endscr"></div>
+  <div id="chat"><div class="log"></div><input placeholder="Message (Entrée pour envoyer, Échap pour annuler)" maxlength="140"></div>
+  <div id="toasts"></div>
+</div>
+</body>
+</html>

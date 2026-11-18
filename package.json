@@ -1,0 +1,16 @@
+{
+  "name": "rafale",
+  "version": "1.0.0",
+  "description": "RAFALE — jeu de tir multijoueur dans le navigateur (battle royale + chacun pour soi, jusqu'à 16 joueurs, hébergé par l'hôte).",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node serve.mjs",
+    "vendor": "node -e \"const f=require('fs');f.copyFileSync('node_modules/three/build/three.module.min.js','vendor/three.module.min.js');f.copyFileSync('node_modules/peerjs/dist/peerjs.min.js','vendor/peerjs.min.js')\""
+  },
+  "devDependencies": {
+    "peerjs": "1.5.4",
+    "three": "0.170.0"
+  },
+  "license": "MIT"
+}
